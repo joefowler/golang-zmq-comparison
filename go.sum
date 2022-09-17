@@ -2,3 +2,7 @@ github.com/pebbe/zmq4 v1.2.9 h1:JlHcdgq6zpppNR1tH0wXJq0XK03pRUc4lBlHTD7aj/4=
 github.com/pebbe/zmq4 v1.2.9/go.mod h1:nqnPueOapVhE2wItZ0uOErngczsJdLOGkebMxaO8r48=
 github.com/zeromq/goczmq v4.1.0+incompatible h1:cGVQaU6kIwwrGso0Pgbl84tzAz/h7FJ3wYQjSonjFFc=
 github.com/zeromq/goczmq v4.1.0+incompatible/go.mod h1:1uZybAJoSRCvZMH2rZxEwWBSmC4T7CB/xQOfChwPEzg=
+github.com/zeromq/gomq v0.0.0-20201031135124-cef4e507bb8e h1:vGjfCnWv/zWeO1ivv4+OUPgTzG/WV1iGfZwVdtUpLkM=
+github.com/zeromq/gomq v0.0.0-20201031135124-cef4e507bb8e/go.mod h1:SkCxcSQ7BQEA9FvDzbj+3hV6EMhSywyxWnHwUXVIyLY=
+github.com/zeromq/gomq/zmtp v0.0.0-20201031135124-cef4e507bb8e h1:pjp04/sSr2TYuaPdt+u6Cc1M38Aocp+3er0akr3auFg=
+github.com/zeromq/gomq/zmtp v0.0.0-20201031135124-cef4e507bb8e/go.mod h1:LBjWEodY/ESvKRwLw3bc7mhn49oiI8qlXUqeqLn0pcU=
