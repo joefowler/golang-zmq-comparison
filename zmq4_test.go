@@ -4,8 +4,8 @@ import (
 	"context"
 	"log"
 	"strings"
-	"time"
 	"testing"
+	"time"
 
 	"github.com/go-zeromq/zmq4"
 )
@@ -37,13 +37,13 @@ func zmq4_pub(lifetime time.Duration, abort chan bool) {
 		[]byte("We would like to see this"),
 	)
 	done := time.NewTimer(lifetime)
-	ticker := time.NewTicker(100*time.Millisecond)
+	ticker := time.NewTicker(100 * time.Millisecond)
 	for {
 		select {
-		case <- done.C:
+		case <-done.C:
 			abort <- true
 			return
-		case <- ticker.C:
+		case <-ticker.C:
 			//  Write two messages, each with an envelope and content
 			err = pub.Send(msgA)
 			if err != nil {
@@ -90,7 +90,7 @@ func zmq4_sub(abort chan bool) {
 	}()
 	for {
 		select {
-		case <- abort:
+		case <-abort:
 			return
 		case msg := <-mchan:
 			log.Printf("[%s] %s\n", msg.Frames[0], msg.Frames[1])
