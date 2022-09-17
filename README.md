@@ -5,3 +5,4 @@ So far, I only intend to use the PUB/SUB feature. There will be tests to make su
 and then a benchmark of some kind.
 
 * **pebbe/zmq4** or https://github.com/pebbe/zmq4
+* **goczmq** or https://github.com/zeromq/goczmq
