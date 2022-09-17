@@ -8,6 +8,8 @@ import (
 
 	"github.com/go-zeromq/zmq4"
 	zmq "github.com/pebbe/zmq4"
+	"github.com/zeromq/gomq"
+	"github.com/zeromq/gomq/zmtp"
 )
 
 const MessagesToSend = 100000
@@ -101,3 +103,37 @@ func (s *PubSocket) Connect(endpoint string) error {
 }
 
 
+func BenchmarkPubOnly_GoMQ(b *testing.B) {
+	pub := NewPub(zmtp.NewSecurityNull())
+	defer pub.Close()
+	if err := pub.Connect("tcp://localhost:12303"); err != nil {
+		log.Fatal(err)
+	}
+
+
+	// pub := zmq4.NewPub(context.Background())
+	// defer pub.Close()
+	//
+	// err := pub.Listen("tcp://*:5569")
+	// if err != nil {
+	// 	log.Fatalf("could not listen: %v", err)
+	// }
+	//
+	// msgA := zmq4.NewMsgFrom(
+	// 	[]byte("A"),
+	// 	[]byte("We don't want to see this"),
+	// )
+	// msgB := zmq4.NewMsgFrom(
+	// 	[]byte("B"),
+	// 	[]byte("We would like to see this"),
+	// )
+	// for i := 0; i < MessagesToSend; i++ {
+	// 	//  Write two messages, each with an envelope and content
+	// 	if err := pub.Send(msgA); err != nil {
+	// 		log.Fatal(err)
+	// 	}
+	// 	if err := pub.Send(msgB); err != nil {
+	// 		log.Fatal(err)
+	// 	}
+	// }
+}
