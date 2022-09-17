@@ -1,3 +1,7 @@
+github.com/go-zeromq/goczmq/v4 v4.2.2 h1:HAJN+i+3NW55ijMJJhk7oWxHKXgAuSBkoFfvr8bYj4U=
+github.com/go-zeromq/goczmq/v4 v4.2.2/go.mod h1:Sm/lxrfxP/Oxqs0tnHD6WAhwkWrx+S+1MRrKzcxoaYE=
+github.com/go-zeromq/zmq4 v0.15.0 h1:SLqukpmLTx0JsLaOaCCjwy5eBdfJ+ouJX/677HoFbJM=
+github.com/go-zeromq/zmq4 v0.15.0/go.mod h1:sD47DcXifeUFsVTB2ps8ijqTpEuTAlYgfuLoiWEXdCE=
 github.com/pebbe/zmq4 v1.2.9 h1:JlHcdgq6zpppNR1tH0wXJq0XK03pRUc4lBlHTD7aj/4=
 github.com/pebbe/zmq4 v1.2.9/go.mod h1:nqnPueOapVhE2wItZ0uOErngczsJdLOGkebMxaO8r48=
 github.com/zeromq/goczmq v4.1.0+incompatible h1:cGVQaU6kIwwrGso0Pgbl84tzAz/h7FJ3wYQjSonjFFc=
@@ -6,3 +10,7 @@ github.com/zeromq/gomq v0.0.0-20201031135124-cef4e507bb8e h1:vGjfCnWv/zWeO1ivv4+
 github.com/zeromq/gomq v0.0.0-20201031135124-cef4e507bb8e/go.mod h1:SkCxcSQ7BQEA9FvDzbj+3hV6EMhSywyxWnHwUXVIyLY=
 github.com/zeromq/gomq/zmtp v0.0.0-20201031135124-cef4e507bb8e h1:pjp04/sSr2TYuaPdt+u6Cc1M38Aocp+3er0akr3auFg=
 github.com/zeromq/gomq/zmtp v0.0.0-20201031135124-cef4e507bb8e/go.mod h1:LBjWEodY/ESvKRwLw3bc7mhn49oiI8qlXUqeqLn0pcU=
+golang.org/x/sync v0.0.0-20220601150217-0de741cfad7f h1:Ax0t5p6N38Ga0dThY21weqDEyz2oklo4IvDkpigvkD8=
+golang.org/x/sync v0.0.0-20220601150217-0de741cfad7f/go.mod h1:RxMgew5VJxzue5/jJTE5uejpjVlOe/izrB70Jof72aM=
+golang.org/x/text v0.3.7 h1:olpwvP2KacW1ZWvsR7uQhoyTYvKAupfQrRGBFM352Gk=
+golang.org/x/text v0.3.7/go.mod h1:u+2+/6zg+i71rQMx5EYifcz6MCKuco9NR6JIITiCfzQ=

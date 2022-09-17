@@ -17,7 +17,7 @@ func TestGOCZMQ(t *testing.T) {
 }
 
 func main_wuclient(lifetime time.Duration) {
-	pubEndpoint := "tcp://127.0.0.1:5556"
+	pubEndpoint := "tcp://127.0.0.1:8556"
 	totalTemperature := 0
 
 	filter := "8"
@@ -68,7 +68,7 @@ func main_wuclient(lifetime time.Duration) {
 }
 
 func main_wuserver(lifetime time.Duration) {
-	pubEndpoint := "tcp://127.0.0.1:5556"
+	pubEndpoint := "tcp://127.0.0.1:8556"
 	pubSock, err := czmq.NewPub(pubEndpoint)
 	if err != nil {
 		panic(err)
