@@ -14,9 +14,8 @@ const (
 	SUBSCRIBERS_EXPECTED = 10
 )
 
-func TestPublish(t *testing.T) {
-
-	for i:=0; i<SUBSCRIBERS_EXPECTED; i++ {
+func TestPebbePublish(t *testing.T) {
+	for i := 0; i < SUBSCRIBERS_EXPECTED; i++ {
 		go main_sub()
 	}
 	main_pub()
@@ -84,7 +83,7 @@ func main_pub() {
 	}
 	//  Now broadcast exactly 1M updates followed by END
 	fmt.Println("Broadcasting messages")
-	for update_nbr := 0; update_nbr < 1000000; update_nbr++ {
+	for update_nbr := 0; update_nbr < 100000; update_nbr++ {
 		publisher.Send("Rhubarb", 0)
 	}
 
