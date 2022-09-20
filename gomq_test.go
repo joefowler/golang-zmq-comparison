@@ -2,6 +2,7 @@ package zmq_comparison
 
 import (
 	"bytes"
+	"fmt"
 	"net"
 	"testing"
 
@@ -107,31 +108,37 @@ func TestPushPull(t *testing.T) {
 	var addr net.Addr
 	var err error
 
+	echan := make(chan error)
+
 	go func() {
+		defer close(echan)
 		pull := gomq.NewPull(zmtp.NewSecurityNull())
 		defer pull.Close()
 		err = pull.Connect("tcp://127.0.0.1:12345")
 		if err != nil {
-			t.Fatal(err)
+			echan <- err
+			return
 		}
 
 		msg, err := pull.Recv()
 		if err != nil {
-			t.Fatal(err)
+			echan <- err
+			return
 		}
 
 		if want, got := 0, bytes.Compare([]byte("HELLO"), msg); want != got {
-			t.Fatalf("want %v, got %v", want, got)
+			err = fmt.Errorf("want %v, got %v", want, got)
+			echan <- err
+			return
 		}
 
 		t.Logf("pull received: %q", string(msg))
 
 		err = pull.Send([]byte("GOODBYE"))
 		if err != nil {
-			t.Fatal(err)
+			echan <- err
+			return
 		}
-
-		pull.Close()
 	}()
 
 	push := gomq.NewPush(zmtp.NewSecurityNull())
@@ -162,8 +169,9 @@ func TestPushPull(t *testing.T) {
 	}
 
 	t.Logf("push received: %q", string(msg))
-
-	push.Close()
+	if err, ok := <-echan; !ok {
+		t.Fatal(err)
+	}
 }
 
 func TestPullPush(t *testing.T) {
@@ -171,31 +179,37 @@ func TestPullPush(t *testing.T) {
 	var addr net.Addr
 	var err error
 
+	echan := make(chan error)
+
 	go func() {
+		defer close(echan)
 		push := gomq.NewPush(zmtp.NewSecurityNull())
 		defer push.Close()
 		err = push.Connect("tcp://127.0.0.1:" + port)
 		if err != nil {
-			t.Fatal(err)
+			echan <- err
+			return
 		}
 
 		msg, err := push.Recv()
 		if err != nil {
-			t.Fatal(err)
+			echan <- err
+			return
 		}
 
 		if want, got := 0, bytes.Compare([]byte("HELLO"), msg); want != got {
-			t.Fatalf("want %v, got %v", want, got)
+			err = fmt.Errorf("want %v, got %v", want, got)
+			echan <- err
+			return
 		}
 
 		t.Logf("push received: %q", string(msg))
 
 		err = push.Send([]byte("GOODBYE"))
 		if err != nil {
-			t.Fatal(err)
+			echan <- err
+			return
 		}
-
-		push.Close()
 	}()
 
 	pull := gomq.NewPull(zmtp.NewSecurityNull())
