@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"log"
 	"net"
-	"time"
 	"testing"
+	"time"
 
 	"github.com/go-zeromq/zmq4"
 	zmq "github.com/pebbe/zmq4"
@@ -15,7 +15,7 @@ import (
 	"github.com/zeromq/gomq/zmtp"
 )
 
-const MessagesToSend = 1000000
+const MessageSetsToSend = 1000000
 const Endpoint = "tcp://*:54345"
 
 func BenchmarkPubOnly_PebbeZMQ(b *testing.B) {
@@ -28,7 +28,7 @@ func BenchmarkPubOnly_PebbeZMQ(b *testing.B) {
 	defer publisher.Close()
 	publisher.SetSndhwm(1100000)
 	publisher.Bind(Endpoint)
-	time.Sleep(300*time.Millisecond)
+	time.Sleep(300 * time.Millisecond)
 
 	msgA := [][]byte{
 		[]byte("A"),
@@ -39,8 +39,8 @@ func BenchmarkPubOnly_PebbeZMQ(b *testing.B) {
 		[]byte("We would like to see this"),
 	}
 
-	//  Now broadcast exactly 1M updates followed by END
-	for i := 0; i < MessagesToSend; i++ {
+	//  Now broadcast exactly `MessageSetsToSend` updates followed by END
+	for i := 0; i < MessageSetsToSend; i++ {
 		if _, err := publisher.SendMessage(msgA); err != nil {
 			log.Fatal(err)
 		}
@@ -48,7 +48,9 @@ func BenchmarkPubOnly_PebbeZMQ(b *testing.B) {
 			log.Fatal(err)
 		}
 		msg := fmt.Sprintf("Count %d", i)
-		publisher.Send(msg, 0)
+		if _, err := publisher.Send(msg, 0); err != nil {
+			log.Fatal(err)
+		}
 	}
 }
 
@@ -69,8 +71,7 @@ func BenchmarkPubOnly_ZMQ4(b *testing.B) {
 		[]byte("B"),
 		[]byte("We would like to see this"),
 	)
-	broccoli := zmq4.NewMsgFrom([]byte("Broccoli"))
-	for i := 0; i < MessagesToSend; i++ {
+	for i := 0; i < MessageSetsToSend; i++ {
 		//  Write two messages, each with an envelope and content
 		if err := pub.Send(msgA); err != nil {
 			log.Fatal(err)
@@ -78,7 +79,8 @@ func BenchmarkPubOnly_ZMQ4(b *testing.B) {
 		if err := pub.Send(msgB); err != nil {
 			log.Fatal(err)
 		}
-		pub.Send(broccoli)
+		msg := zmq4.NewMsgFrom([]byte(fmt.Sprintf("Count %d", i)))
+		pub.Send(msg)
 	}
 }
 
@@ -115,35 +117,34 @@ func (s *PubSocket) Connect(endpoint string) error {
 func BenchmarkPubOnly_GoMQ(b *testing.B) {
 	pub := NewPub(zmtp.NewSecurityNull())
 	defer pub.Close()
-	if err := pub.Connect("tcp://localhost:12303"); err != nil {
+	Endpoint := "tcp://localhost:54345"
+	if addr, err := pub.Bind(Endpoint); err != nil {
+		log.Printf("Tried to bind '%s' returned address %v", Endpoint, addr)
 		log.Fatal(err)
 	}
 
-	// pub := zmq4.NewPub(context.Background())
-	// defer pub.Close()
-	//
-	// err := pub.Listen("tcp://*:5569")
-	// if err != nil {
-	// 	log.Fatalf("could not listen: %v", err)
-	// }
-	//
-	// msgA := zmq4.NewMsgFrom(
-	// 	[]byte("A"),
-	// 	[]byte("We don't want to see this"),
-	// )
-	// msgB := zmq4.NewMsgFrom(
-	// 	[]byte("B"),
-	// 	[]byte("We would like to see this"),
-	// )
-	// for i := 0; i < MessagesToSend; i++ {
-	// 	//  Write two messages, each with an envelope and content
-	// 	if err := pub.Send(msgA); err != nil {
-	// 		log.Fatal(err)
-	// 	}
-	// 	if err := pub.Send(msgB); err != nil {
-	// 		log.Fatal(err)
-	// 	}
-	// }
+	msgA := [][]byte{
+		[]byte("A"),
+		[]byte("We don't want to see this"),
+	}
+	msgB := [][]byte{
+		[]byte("B"),
+		[]byte("We would like to see this"),
+	}
+	for i := 0; i < MessageSetsToSend; i++ {
+		//  Write two messages, each with an envelope and content
+
+		if err := pub.SendMultipart(msgA); err != nil {
+			log.Fatal(err)
+		}
+		if err := pub.SendMultipart(msgB); err != nil {
+			log.Fatal(err)
+		}
+		msgC := []byte(fmt.Sprintf("Count %d", i))
+		if err := pub.Send(msgC); err != nil {
+			log.Fatal(err)
+		}
+	}
 }
 
 func BenchmarkPubOnly_GoCZMQ(b *testing.B) {
@@ -164,10 +165,9 @@ func BenchmarkPubOnly_GoCZMQ(b *testing.B) {
 		[]byte("B"),
 		[]byte("We would like to see this"),
 	}
-	broccoli := [][]byte{[]byte("Broccoli")}
 
 	//  Now broadcast exactly 1M updates followed by END
-	for i := 0; i < MessagesToSend; i++ {
+	for i := 0; i < MessageSetsToSend; i++ {
 		if err := pubSock.SendMessage(msgA); err != nil {
 			log.Printf("Failure %v on message A %d\n", err, i)
 			// log.Fatal(err)
@@ -176,6 +176,9 @@ func BenchmarkPubOnly_GoCZMQ(b *testing.B) {
 			log.Printf("Failure %v on message B %d\n", err, i)
 			// log.Fatal(err)
 		}
-		pubSock.SendMessage(broccoli)
+		broccoli := [][]byte{[]byte(fmt.Sprintf("Count %d", i))}
+		if err := pubSock.SendMessage(broccoli); err != nil {
+			log.Printf("Failure %v on message C %d\n", err, i)
+		}
 	}
 }
