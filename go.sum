@@ -10,7 +10,7 @@ github.com/zeromq/gomq v0.0.0-20201031135124-cef4e507bb8e h1:vGjfCnWv/zWeO1ivv4+
 github.com/zeromq/gomq v0.0.0-20201031135124-cef4e507bb8e/go.mod h1:SkCxcSQ7BQEA9FvDzbj+3hV6EMhSywyxWnHwUXVIyLY=
 github.com/zeromq/gomq/zmtp v0.0.0-20201031135124-cef4e507bb8e h1:pjp04/sSr2TYuaPdt+u6Cc1M38Aocp+3er0akr3auFg=
 github.com/zeromq/gomq/zmtp v0.0.0-20201031135124-cef4e507bb8e/go.mod h1:LBjWEodY/ESvKRwLw3bc7mhn49oiI8qlXUqeqLn0pcU=
-golang.org/x/sync v0.0.0-20220601150217-0de741cfad7f h1:Ax0t5p6N38Ga0dThY21weqDEyz2oklo4IvDkpigvkD8=
-golang.org/x/sync v0.0.0-20220601150217-0de741cfad7f/go.mod h1:RxMgew5VJxzue5/jJTE5uejpjVlOe/izrB70Jof72aM=
+golang.org/x/sync v0.0.0-20220907140024-f12130a52804 h1:0SH2R3f1b1VmIMG7BXbEZCBUu2dKmHschSmjqGUrW8A=
+golang.org/x/sync v0.0.0-20220907140024-f12130a52804/go.mod h1:RxMgew5VJxzue5/jJTE5uejpjVlOe/izrB70Jof72aM=
 golang.org/x/text v0.3.7 h1:olpwvP2KacW1ZWvsR7uQhoyTYvKAupfQrRGBFM352Gk=
 golang.org/x/text v0.3.7/go.mod h1:u+2+/6zg+i71rQMx5EYifcz6MCKuco9NR6JIITiCfzQ=
