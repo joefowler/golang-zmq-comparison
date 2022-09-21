@@ -16,6 +16,10 @@ import (
 	"github.com/zeromq/gomq/zmtp"
 )
 
+// Do we send a set of 3 messages in 5 parts per message set?
+// If false, send only the "COUNT %d" message.
+const filler_messages = false
+
 func PubOnly_PebbeZMQ(Endpoint string, MessageSetsToSend int) {
 	log.Printf("Running PebbeZMQ publisher with %d message sets", MessageSetsToSend)
 	ctx, _ := zmq.NewContext()
@@ -43,11 +47,13 @@ func PubOnly_PebbeZMQ(Endpoint string, MessageSetsToSend int) {
 	}
 	//  Now broadcast exactly `MessageSetsToSend` updates followed by END
 	for i := 0; i < MessageSetsToSend; i++ {
-		if _, err := publisher.SendMessage(msgA); err != nil {
-			log.Fatal(err)
-		}
-		if _, err := publisher.SendMessage(msgB); err != nil {
-			log.Fatal(err)
+		if filler_messages {
+			if _, err := publisher.SendMessage(msgA); err != nil {
+				log.Fatal(err)
+			}
+			if _, err := publisher.SendMessage(msgB); err != nil {
+				log.Fatal(err)
+			}
 		}
 		msg := fmt.Sprintf("Count %d", i)
 		if _, err := publisher.Send(msg, 0); err != nil {
@@ -87,12 +93,14 @@ func PubOnly_ZMQ4(Endpoint string, MessageSetsToSend int) {
 	}
 
 	for i := 0; i < MessageSetsToSend; i++ {
-		//  Write two messages, each with an envelope and content
-		if err := pub.Send(msgA); err != nil {
-			log.Fatal(err)
-		}
-		if err := pub.Send(msgB); err != nil {
-			log.Fatal(err)
+		if filler_messages {
+			//  Write two messages, each with an envelope and content
+			if err := pub.Send(msgA); err != nil {
+				log.Fatal(err)
+			}
+			if err := pub.Send(msgB); err != nil {
+				log.Fatal(err)
+			}
 		}
 		msg := zmq4.NewMsgFrom([]byte(fmt.Sprintf("Count %d", i)))
 		pub.Send(msg)
@@ -160,13 +168,14 @@ func PubOnly_GoMQ(Endpoint string, MessageSetsToSend int) {
 		log.Printf("Failure %v on message START", err)
 	}
 	for i := 0; i < MessageSetsToSend; i++ {
-		//  Write two messages, each with an envelope and content
-
-		if err := pub.SendMultipart(msgA); err != nil {
-			log.Fatal(err)
-		}
-		if err := pub.SendMultipart(msgB); err != nil {
-			log.Fatal(err)
+		if filler_messages {
+			//  Write two messages, each with an envelope and content
+			if err := pub.SendMultipart(msgA); err != nil {
+				log.Fatal(err)
+			}
+			if err := pub.SendMultipart(msgB); err != nil {
+				log.Fatal(err)
+			}
 		}
 		msgC := []byte(fmt.Sprintf("Count %d", i))
 		if err := pub.Send(msgC); err != nil {
@@ -208,13 +217,15 @@ func PubOnly_GoCZMQ(Endpoint string, MessageSetsToSend int) {
 
 	//  Now broadcast exactly 1M updates followed by END
 	for i := 0; i < MessageSetsToSend; i++ {
-		if err := pubSock.SendMessage(msgA); err != nil {
-			log.Printf("Failure %v on message A %d\n", err, i)
-			// log.Fatal(err)
-		}
-		if err := pubSock.SendMessage(msgB); err != nil {
-			log.Printf("Failure %v on message B %d\n", err, i)
-			// log.Fatal(err)
+		if filler_messages {
+			if err := pubSock.SendMessage(msgA); err != nil {
+				log.Printf("Failure %v on message A %d\n", err, i)
+				// log.Fatal(err)
+			}
+			if err := pubSock.SendMessage(msgB); err != nil {
+				log.Printf("Failure %v on message B %d\n", err, i)
+				// log.Fatal(err)
+			}
 		}
 		broccoli := [][]byte{[]byte(fmt.Sprintf("Count %d", i))}
 		if err := pubSock.SendMessage(broccoli); err != nil {
