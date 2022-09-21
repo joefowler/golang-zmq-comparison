@@ -1,11 +1,12 @@
-package zmq_comparison
+package main
 
 import (
 	"context"
 	"fmt"
 	"log"
 	"net"
-	"testing"
+	"os"
+	"strconv"
 	"time"
 
 	"github.com/go-zeromq/zmq4"
@@ -15,11 +16,8 @@ import (
 	"github.com/zeromq/gomq/zmtp"
 )
 
-const MessageSetsToSend = 1000000
-const Endpoint = "tcp://*:54345"
-
-func BenchmarkPubOnly_PebbeZMQ(b *testing.B) {
-	log.Printf("Running benchmark PebbeZMQ")
+func PubOnly_PebbeZMQ(Endpoint string, MessageSetsToSend int) {
+	log.Printf("Running PebbeZMQ publisher with %d message sets", MessageSetsToSend)
 	ctx, _ := zmq.NewContext()
 	defer ctx.Term()
 
@@ -39,6 +37,10 @@ func BenchmarkPubOnly_PebbeZMQ(b *testing.B) {
 		[]byte("We would like to see this"),
 	}
 
+	time.Sleep(100 * time.Millisecond)
+	if _, err := publisher.Send("START Pebbe", 0); err != nil {
+		log.Printf("Failure %v on message START", err)
+	}
 	//  Now broadcast exactly `MessageSetsToSend` updates followed by END
 	for i := 0; i < MessageSetsToSend; i++ {
 		if _, err := publisher.SendMessage(msgA); err != nil {
@@ -52,9 +54,13 @@ func BenchmarkPubOnly_PebbeZMQ(b *testing.B) {
 			log.Fatal(err)
 		}
 	}
+	if _, err := publisher.Send("END Pebbe", 0); err != nil {
+		log.Printf("Failure %v on message END", err)
+	}
 }
 
-func BenchmarkPubOnly_ZMQ4(b *testing.B) {
+func PubOnly_ZMQ4(Endpoint string, MessageSetsToSend int) {
+	log.Printf("Running ZMQ4 publisher with %d message sets", MessageSetsToSend)
 	pub := zmq4.NewPub(context.Background())
 	defer pub.Close()
 
@@ -71,6 +77,15 @@ func BenchmarkPubOnly_ZMQ4(b *testing.B) {
 		[]byte("B"),
 		[]byte("We would like to see this"),
 	)
+	time.Sleep(100 * time.Millisecond)
+	start := zmq4.NewMsgFrom([]byte("START ZMQ4"))
+	for i := 0; i < 5; i++ {
+		time.Sleep(4 * time.Millisecond)
+		if err := pub.Send(start); err != nil {
+			log.Printf("Failure %v on message START", err)
+		}
+	}
+
 	for i := 0; i < MessageSetsToSend; i++ {
 		//  Write two messages, each with an envelope and content
 		if err := pub.Send(msgA); err != nil {
@@ -81,6 +96,13 @@ func BenchmarkPubOnly_ZMQ4(b *testing.B) {
 		}
 		msg := zmq4.NewMsgFrom([]byte(fmt.Sprintf("Count %d", i)))
 		pub.Send(msg)
+	}
+	time.Sleep(1000 * time.Millisecond)
+	for i := 0; i < 5; i++ {
+		end := zmq4.NewMsgFrom([]byte("END ZMQ4"))
+		if err := pub.Send(end); err != nil {
+			log.Printf("Failure %v on message END", err)
+		}
 	}
 }
 
@@ -114,10 +136,10 @@ func (s *PubSocket) Connect(endpoint string) error {
 	return gomq.ConnectClient(s, endpoint)
 }
 
-func BenchmarkPubOnly_GoMQ(b *testing.B) {
+func PubOnly_GoMQ(Endpoint string, MessageSetsToSend int) {
+	log.Printf("Running GoMQ publisher with %d message sets", MessageSetsToSend)
 	pub := NewPub(zmtp.NewSecurityNull())
 	// defer pub.Close()
-	Endpoint := "tcp://localhost:54345"
 	if addr, err := pub.Bind(Endpoint); err != nil {
 		log.Printf("Tried to bind '%s' returned address %v", Endpoint, addr)
 		log.Fatal(err)
@@ -131,7 +153,13 @@ func BenchmarkPubOnly_GoMQ(b *testing.B) {
 		[]byte("B"),
 		[]byte("We would like to see this"),
 	}
-	for i := 0; i < MessageSetsToSend/100; i++ {
+
+	time.Sleep(100 * time.Millisecond)
+	start := []byte("START GoMQ")
+	if err := pub.Send(start); err != nil {
+		log.Printf("Failure %v on message START", err)
+	}
+	for i := 0; i < MessageSetsToSend; i++ {
 		//  Write two messages, each with an envelope and content
 
 		if err := pub.SendMultipart(msgA); err != nil {
@@ -145,17 +173,21 @@ func BenchmarkPubOnly_GoMQ(b *testing.B) {
 			log.Fatal(err)
 		}
 	}
+	end := []byte("END GoMQ")
+	if err := pub.Send(end); err != nil {
+		log.Printf("Failure %v on message END", err)
+	}
 }
 
-func BenchmarkPubOnly_GoCZMQ(b *testing.B) {
-	pubEndpoint := Endpoint
-	pubSock, err := czmq.NewPub(pubEndpoint)
+func PubOnly_GoCZMQ(Endpoint string, MessageSetsToSend int) {
+	log.Printf("Running GoCZMQ publisher with %d message sets", MessageSetsToSend)
+	pubSock, err := czmq.NewPub(Endpoint)
 	if err != nil {
 		panic(err)
 	}
 
 	defer pubSock.Destroy()
-	pubSock.Bind(pubEndpoint)
+	pubSock.Bind(Endpoint)
 
 	msgA := [][]byte{
 		[]byte("A"),
@@ -164,6 +196,14 @@ func BenchmarkPubOnly_GoCZMQ(b *testing.B) {
 	msgB := [][]byte{
 		[]byte("B"),
 		[]byte("We would like to see this"),
+	}
+
+	time.Sleep(100 * time.Millisecond)
+	start := [][]byte{[]byte("START GoCZMQ")}
+	for i := 0; i < 10; i++ {
+		if err := pubSock.SendMessage(start); err != nil {
+			log.Printf("Failure %v on message START", err)
+		}
 	}
 
 	//  Now broadcast exactly 1M updates followed by END
@@ -180,5 +220,30 @@ func BenchmarkPubOnly_GoCZMQ(b *testing.B) {
 		if err := pubSock.SendMessage(broccoli); err != nil {
 			log.Printf("Failure %v on message C %d\n", err, i)
 		}
+	}
+	end := [][]byte{[]byte("END GoCZMQ")}
+	for i := 0; i < 10; i++ {
+		time.Sleep(10 * time.Millisecond)
+		if err := pubSock.SendMessage(end); err != nil {
+			log.Printf("Failure %v on message END", err)
+		}
+	}
+}
+
+func main() {
+	library := os.Args[1]
+	nMessageSets, err := strconv.Atoi(os.Args[2])
+	if err != nil {
+		log.Fatal(err)
+	}
+	switch library {
+	case "Pebbe":
+		PubOnly_PebbeZMQ("tcp://*:54345", nMessageSets)
+	case "ZMQ4":
+		PubOnly_ZMQ4("tcp://*:54345", nMessageSets)
+	case "GoCZMQ":
+		PubOnly_GoCZMQ("tcp://*:54345", nMessageSets)
+	case "GoMQ":
+		PubOnly_GoMQ("tcp://localhost:54345", nMessageSets)
 	}
 }
